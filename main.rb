@@ -7,7 +7,11 @@ Window.windowed = false
 
 #バーの定義
 raight_bar = Sprite.new(1900, 550, Image.new(20, 100, C_RED))
+raight_bar_up = false
+raight_bar_down = false
 left_bar = Sprite.new(0, 550, Image.new(20, 100, C_BLUE))
+left_bar_up = false
+left_bar_down = false
 bar_cpu_y = 0
 
 #ボールの定義
@@ -23,9 +27,7 @@ dy = 6
 
 #壁の定義
 walls = [Sprite.new(0, 0, Image.new(1920, 20, C_WHITE)),
-        Sprite.new(0, 1180, Image.new(1920, 20, C_WHITE)),
-        raight_bar,
-        left_bar]
+        Sprite.new(0, 1180, Image.new(1920, 20, C_WHITE))]
 
 #得点管理
 raight_player_point = 0
@@ -113,22 +115,24 @@ Window.loop do
     elsif game_cpu_level
         Window.draw_font(500, 300, "モード選択\n\n1.弱い\n2.普通\n3.強い", Font.default)
         if Input.key_push?(K_1)
-            bar_cpu_y = 5.5
-            game_cpu = true
-            game_cpu_level = false
-        end
-        if Input.key_push?(K_2)
             bar_cpu_y = 7
             game_cpu = true
             game_cpu_level = false
         end
-        if Input.key_push?(K_3)
+        if Input.key_push?(K_2)
             bar_cpu_y = 10
+            game_cpu = true
+            game_cpu_level = false
+        end
+        if Input.key_push?(K_3)
+            bar_cpu_y = 20
             game_cpu = true
             game_cpu_level = false
         end
     elsif game_cpu
         Sprite.draw(walls)
+        Sprite.draw(raight_bar)
+        Sprite.draw(left_bar)
         Sprite.draw(ball)
         Window.draw_font(100, 40, "#{left_player_point}点", Font.default)
         Window.draw_font(1800, 40, "#{raight_player_point}点", Font.default)
@@ -136,9 +140,15 @@ Window.loop do
         #移動判定
         if Input.key_down?(K_O)
             raight_bar.y -= 10
+            raight_bar_up = true
+        else
+            raight_bar_up = false
         end
         if Input.key_down?(K_L)
             raight_bar.y += 10
+            raight_bar_down = true
+        else
+            raight_bar_down = false
         end
         #CPUの動作
         if left_bar.y < ball.y
@@ -175,18 +185,47 @@ Window.loop do
             dy = -dy
             walls_col.play
         end
+        if ball === raight_bar
+            if raight_bar_up
+                ball.x -= dx
+                dx = -dx
+                dy -= 4
+                if dx < 0
+                    dx -= 0.01
+                end
+                if dx > 0
+                    dx += 0.01
+                end
+                walls_col.play
+            elsif raight_bar_down
+                ball.x -= dx
+                dx = -dx
+                dy += 4
+                dx -= 2
+                walls_col.play
+            else
+                ball.x -= dx
+                dx = -dx
+                walls_col.play
+            end
+        end
+        if ball === left_bar
+            ball.x -= dx
+            dx = -dx
+            walls_col.play
+        end
 
         #ボールの速度を上げる
-        ball_count += 1
-        if ball_count == 300
+        # ball_count += 1
+        # if ball_count == 300
             if dx < 0
-                dx -= 4
+                dx -= 0.01
             end
             if dx > 0
-                dx += 4
+                dx += 0.01
             end
-            ball_count = 0
-        end
+        #     ball_count = 0
+        # end
 
         #得点
         if ball.x < 0
@@ -236,6 +275,8 @@ Window.loop do
     elsif game_vs
 
         Sprite.draw(walls)
+        Sprite.draw(raight_bar)
+        Sprite.draw(left_bar)
         Sprite.draw(ball)
         Window.draw_font(100, 40, "#{left_player_point}点", Font.default)
         Window.draw_font(1180, 40, "#{raight_player_point}点", Font.default)
@@ -243,9 +284,15 @@ Window.loop do
         #移動判定
         if Input.key_down?(K_O)
             raight_bar.y -= 10
+            raight_bar_up = true
+        else
+            raight_bar_up = false
         end
         if Input.key_down?(K_L)
             raight_bar.y += 10
+            raight_bar_down = true
+        else
+            raight_bar_down = false
         end
         # if Input.key_down?(K_K)
         #     if raight_bar.x > 1800
@@ -258,9 +305,15 @@ Window.loop do
 
         if Input.key_down?(K_W)
             left_bar.y -= 10
+            left_bar_up = true
+        else
+            left_bar_up = false
         end
         if Input.key_down?(K_S)
             left_bar.y += 10
+            left_bar_down = true
+        else
+            left_bar_down = false
         end
 
         #バーの壁判定
@@ -290,17 +343,57 @@ Window.loop do
             dy = -dy
             walls_col.play
         end
+        if ball === raight_bar
+            if raight_bar_up
+                ball.x -= dx
+                dx = -dx
+                dy -= 4
+                walls_col.play
+            elsif raight_bar_down
+                ball.x -= dx
+                dx = -dx
+                dy += 4
+                walls_col.play
+            else
+                ball.x -= dx
+                dx = -dx
+                walls_col.play
+            end
+        end
+        if ball === left_bar
+            if left_bar_up
+                ball.x -= dx
+                dx = -dx
+                dy -= 4
+                walls_col.play
+            elsif left_bar_down
+                ball.x -= dx
+                dx = -dx
+                dy += 4
+                walls_col.play
+            else
+                ball.x -= dx
+                dx = -dx
+                walls_col.play
+            end
+        end
 
         #ボールの速度を上げる
-        ball_count += 1
-        if ball_count == 300
-            if dx < 0
-                dx -= 4
-            end
-            if dx > 0
-                dx += 4
-            end
-            ball_count = 0
+        # ball_count += 1
+        # if ball_count == 300
+        #     if dx < 0
+        #         dx -= 4
+        #     end
+        #     if dx > 0
+        #         dx += 4
+        #     end
+        #     ball_count = 0
+        # end
+        if dx < 0
+            dx -= 0.01
+        end
+        if dx > 0
+            dx += 0.01
         end
 
         #得点
